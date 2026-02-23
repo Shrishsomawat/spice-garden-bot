@@ -3,42 +3,35 @@ from twilio.twiml.messaging_response import MessagingResponse
 from groq import Groq
 import os
 
-# Load .env only in local development
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except:
-    pass
-
 app = Flask(__name__)
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-client = Groq(api_key=GROQ_API_KEY)
 
-RESTAURANT_INFO = """
+@app.route("/")
+def home():
+    return "Bot is running!", 200
+
+@app.route("/whatsapp", methods=["POST"])
+def whatsapp_reply():
+    try:
+        GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+        client = Groq(api_key=GROQ_API_KEY)
+        
+        incoming_msg = request.values.get("Body", "").strip()
+        
+        RESTAURANT_INFO = """
 You are a helpful chatbot assistant for Spice Garden Restaurant in Hyderabad.
 Only answer questions related to this restaurant. Be friendly, warm and helpful.
 
 MENU:
-Starters: Veg Samosa - ₹80, Paneer Tikka - ₹180, Chicken Wings - ₹220
-Main Course: Dal Makhani - ₹160, Butter Chicken - ₹250, Paneer Butter Masala - ₹200
-Rice & Breads: Steamed Rice - ₹80, Butter Naan - ₹40, Jeera Rice - ₹100
-Desserts: Gulab Jamun - ₹80, Ice Cream - ₹100, Kheer - ₹90
-Drinks: Lassi - ₹60, Cold Coffee - ₹80, Fresh Lime Soda - ₹50
+Starters: Veg Samosa - Rs80, Paneer Tikka - Rs180, Chicken Wings - Rs220
+Main Course: Dal Makhani - Rs160, Butter Chicken - Rs250, Paneer Butter Masala - Rs200
+Rice & Breads: Steamed Rice - Rs80, Butter Naan - Rs40, Jeera Rice - Rs100
+Desserts: Gulab Jamun - Rs80, Ice Cream - Rs100, Kheer - Rs90
+Drinks: Lassi - Rs60, Cold Coffee - Rs80, Fresh Lime Soda - Rs50
 
 TIMINGS: Monday to Sunday, 11:00 AM to 11:00 PM
 LOCATION: Banjara Hills, Hyderabad
 CONTACT: +91 98765 43210
 """
-
-@app.route("/")
-def home():
-    return "Spice Garden Bot is running!", 200
-
-@app.route("/whatsapp", methods=["POST"])
-def whatsapp_reply():
-    try:
-        incoming_msg = request.values.get("Body", "").strip()
-        
         response = client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[
@@ -55,9 +48,9 @@ def whatsapp_reply():
 
     except Exception as e:
         resp = MessagingResponse()
-        resp.message(f"Sorry, something went wrong: {str(e)}")
+        resp.message(f"Error: {str(e)}")
         return str(resp)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
