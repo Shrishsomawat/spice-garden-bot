@@ -1,1 +1,1 @@
-web: python whatsapp.py
+web: flask --app whatsapp run --host=0.0.0.0 --port=$PORT

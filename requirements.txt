@@ -1,3 +1,5 @@
-streamlit
+flask
 groq
 python-dotenv
+twilio
+gunicorn
