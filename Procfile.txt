@@ -1,1 +1,1 @@
-web: flask --app whatsapp run --host=0.0.0.0 --port=$PORT
+web: gunicorn whatsapp:app --bind 0.0.0.0:$PORT
